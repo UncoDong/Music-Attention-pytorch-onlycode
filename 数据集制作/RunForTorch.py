@@ -22,7 +22,7 @@ def getData():
     data={}
     for x in listdir:
         if 'wav' in x:
-            y,rate=librosa.load('wavDatasets//'+x,sr=4410)
+            y,rate=librosa.load('wavDatasets//'+x,sr=44100)
             data[x[0:-4]]=y
     return data
 
@@ -177,7 +177,6 @@ def train(input_tensor, target_tensor, encoder, decoder, encoder_optimizer, deco
             loss += criterion(decoder_output, target_tensor[di])
             decoder_input = target_tensor[di]  # Teacher forcing
 
-
     else:
         # Without teaching forcing: use its own predictions as the next input
         for di in range(target_length):
@@ -314,8 +313,8 @@ def evaluateRandomly(encoder, decoder, x_test,y_test=None,n=1):
 
 
 hidden_size = 256
-#20是可调参数
-encoder1 = EncoderRNN(20, hidden_size).to(device)
+#第一个参数不是可调的
+encoder1 = EncoderRNN(38, hidden_size).to(device)
 #38不可调，千万不要动。
 attn_decoder1 = AttnDecoderRNN(hidden_size, 38, dropout_p=0.1).to(device)
 #20是训练集数据的个数，可以小于，但不能大于
@@ -324,6 +323,7 @@ trainIters(encoder1, attn_decoder1, 20,epochs=10)
 
 torch.save(encoder1,'ecnoder1.pkl')
 torch.save(attn_decoder1,'attn_decoder1.pkl')
+
 #x_train和y_train是测试数据。
 #n代表测试多少个测试数据
 res=evaluateRandomly(encoder1, attn_decoder1,x_train,y_train,n=1)
